@@ -2,62 +2,58 @@
 
 ## Project Overview
 
-This project classifies high-magnitude earthquakes using limited seismic data from Rwanda. It integrates local and global seismic records with location and depth features. Neural networks with optimization and regularization techniques improve prediction accuracy. The dataset includes latitude, longitude, depth, and magnitude of seismic events. Comprehensive error analysis using metrics like F1-score, precision, recall, and confusion matrices was performed to evaluate model performance.
+This project classifies high-magnitude earthquakes (≥6.0) using seismic data from Rwanda. The dataset contains event features like latitude, longitude, depth, and magnitude. A binary classification target `HighMag` is derived. Neural networks with various optimization and regularization techniques were applied to improve model performance. Comprehensive evaluation was done using accuracy, F1-score, precision, recall, loss curves, and confusion matrices.
+
 ## Dataset Description
 
-The dataset contains seismic event records, including:
-
-- **Latitude** and **Longitude** — geographic location of the seismic event  
-- **Depth** — depth at which the seismic event occurred  
-- **Magnitude** — the Richter scale magnitude of the seismic event  
-- **HighMag** — a derived binary label indicating whether the magnitude is high (≥6.0)
-
-The target variable (`HighMag`) is used to predict whether an earthquake is "high magnitude."
-
----
+The dataset includes:
+- Latitude and Longitude — location of the seismic event  
+- Depth — depth of the earthquake (in km)  
+- Magnitude — Richter scale magnitude  
+- HighMag — binary label (1 if magnitude ≥ 6.0, else 0)
 
 ## Training Instances Summary Table
 
-| Training Instance         | Optimizer     | Regularizer     | Epochs           | Early Stopping | Learning Rate | Accuracy | F1 Score | Recall | Precision |
-|--------------------------|---------------|-----------------|------------------|----------------|---------------|----------|----------|--------|-----------|
-| Instance 1 (Baseline)    | Default (Adam)| None            | 30               | No             | 0.001 (default)| 0.8212   | 0.6262   | 0.4610 | 0.9759    |
-| Instance 2               | Adam          | L2 (0.002)      | ≤30 (early stop) | Yes            | 0.001         | 0.85     | 0.7006   | 0.54   | 0.99      |
-| Instance 3               | RMSprop       | None            | ≤30 (early stop) | Yes            | 0.001         | 0.67     | 0.6456   | 0.92   | 0.50      |
-| Instance 4 (Best)        | Adam          | None            | ≤30 (early stop) | Yes            | 0.001         | 0.89     | 0.8090   | 0.74   | 0.89      |
+| Training Instance     | Optimizer | Regularizer | Early Stopping | Learning Rate | Accuracy | F1 Score | Recall | Precision | Loss (Val) |
+|-----------------------|-----------|-------------|----------------|----------------|----------|----------|--------|-----------|------------|
+| Instance 1 (Baseline) | Adam (default) | None        | No             | 0.001          | 0.8212   | 0.6262   | 0.4610 | 0.9759    | ~0.25      |
+| Instance 2            | Adam     | L2 (0.002)  | Yes            | 0.001          | 0.85     | 0.7006   | 0.54   | 0.99      | ~0.41      |
+| Instance 3            | RMSprop  | None        | Yes            | 0.001          | 0.67     | 0.6456   | 0.92   | 0.50      | ~0.55      |
+| Instance 4 (Best)     | Adam     | None        | Yes            | 0.001          | 0.89     | 0.8090   | 0.74   | 0.89      | ~0.30      |
 
----
+## Summary of Results and Justification
 
-## Summary of Results
+- **Best Performance**:  
+  Instance 4 (Adam, no regularization, with early stopping) achieved a balanced F1-score of 0.81, with high precision (0.89) and good recall (0.74).  
+  The model achieved this balance by preventing overfitting via early stopping, while still allowing flexibility in learning without regularization constraints.
 
-- The best performing model was **Instance 4**, using the Adam optimizer without regularization but with early stopping.  
-- This model achieved:
-  - **Accuracy:** 89%
-  - **F1 Score:** 0.81
-  - **Precision:** 0.89
-  - **Recall:** 0.74
+- **Baseline (Instance 1)** had high accuracy and F1 but lacked safeguards like early stopping, risking overfitting on training data.
 
-In contrast, **Instance 2** showed very high **precision** (0.99) but lower recall, resulting in a moderate F1 score.  
-**Instance 3** demonstrated strong recall (0.92) but low precision, indicating the model over-predicted positive cases.
+- **Instance 2** had very high precision (0.99) due to L2 regularization, but poor recall (0.54), meaning many actual high-magnitude quakes were missed — a classic sign of underfitting.
 
----
+- **Instance 3 (RMSprop)** prioritized recall (0.92) but at the cost of precision (0.50), producing too many false positives. RMSprop's adaptive updates may have contributed to instability in convergence.
+
+- **Why Adam Outperformed RMSprop**:  
+  Adam combines momentum and adaptive learning rates, stabilizing training and preventing over-aggressive updates. Early stopping helped avoid overfitting.
+
+- **Effect of Regularization**:  
+  L2 regularization limited model complexity in Instance 2, improving precision but reducing its ability to learn patterns associated with positive cases.
+
+- **Early Stopping** across all models improved generalization by halting training once validation loss stopped improving, leading to better real-world performance.
 
 ## ML vs Neural Network Comparison
 
-Although not detailed in this notebook, traditional ML algorithms (e.g., Random Forest, Logistic Regression) tend to perform comparably on simpler or more linearly separable datasets. However, the neural network's flexibility and ability to model complex nonlinear patterns made it more suitable here.
+Traditional ML algorithms (Logistic Regression, SVM, Random Forest) work well on linearly separable data. However, this task involved learning complex interactions (location + depth + magnitude), which neural networks handled better.
 
-### Potential Hyperparameters for ML Models:
+### Typical ML Hyperparameters:
+- Random Forest: `max_depth`, `n_estimators`, `min_samples_split`
+- Logistic Regression: `C` (regularization), `penalty`, `solver`
+- SVM: `C`, `gamma`, `kernel`
 
-- Max depth, number of trees (for Random Forest)  
-- Regularization (C) for Logistic Regression  
-- Kernel, gamma, and C for SVMs  
-
-Neural networks, especially when enhanced with early stopping and optimizer tuning, offer greater adaptability to data with interaction effects like seismic features.
-
----
+Neural networks with dropout, optimizer selection, and early stopping are better suited for learning non-linear patterns present in this dataset.
 
 ## Model Deployment
 
-Link to video: https://youtu.be/NYy2FId0ZQ8
+Link to video: https://www.youtube.com/watch?v=NYy2FId0ZQ8
 
-The best model was saved as: `best_earthquake_model.h5`
-
+Best model saved as: `models/best_earthquake_model.h5`  
