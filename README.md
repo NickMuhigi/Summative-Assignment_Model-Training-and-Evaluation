@@ -57,4 +57,7 @@ Neural networks, especially when enhanced with early stopping and optimizer tuni
 
 ## Model Deployment
 
+Link to video: https://youtu.be/NYy2FId0ZQ8
+
 The best model was saved as: `best_earthquake_model.h5`
+
