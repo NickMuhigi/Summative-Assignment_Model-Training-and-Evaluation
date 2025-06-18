@@ -56,4 +56,4 @@ Neural networks with dropout, optimizer selection, and early stopping are better
 
 Link to video: https://www.youtube.com/watch?v=NYy2FId0ZQ8
 
-Best model saved as: `models/best_earthquake_model.h5`  
+Best model saved as: `best_earthquake_model.h5`  
